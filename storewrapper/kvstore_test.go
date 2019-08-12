@@ -2,13 +2,12 @@ package storewrapper_test
 
 import (
 	"io/ioutil"
-	"storewrapper"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/dgamingfoundation/cosmos_utils/storewrapper"
+	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 )
