@@ -1,4 +1,4 @@
-module storewrapper
+module github.com/dgamingfoundation/cosmos_utils/storewrapper
 
 go 1.12
 
