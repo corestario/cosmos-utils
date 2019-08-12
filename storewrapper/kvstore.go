@@ -2,7 +2,7 @@ package storewrapper
 
 import (
 	"encoding/binary"
-
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/store/types"
 )
 
@@ -32,7 +32,12 @@ func NewKVStore(store types.KVStore, chunkSize int) *KVStore {
 func (k *KVStore) GetW(keySrc []byte) (res []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			nErr, nOk := r.(error)
+			if nOk {
+				err = nErr
+			} else {
+				err = fmt.Errorf("%v", r)
+			}
 		}
 	}()
 
@@ -59,7 +64,12 @@ func (k *KVStore) GetW(keySrc []byte) (res []byte, err error) {
 func (k *KVStore) HasW(keySrc []byte) (parts int, ok bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			nErr, nOk := r.(error)
+			if nOk {
+				err = nErr
+			} else {
+				err = fmt.Errorf("%v", r)
+			}
 		}
 	}()
 
@@ -85,7 +95,12 @@ func (k *KVStore) HasW(keySrc []byte) (parts int, ok bool, err error) {
 func (k *KVStore) SetW(keySrc, valueSrc []byte) (parts int, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			nErr, nOk := r.(error)
+			if nOk {
+				err = nErr
+			} else {
+				err = fmt.Errorf("%v", r)
+			}
 		}
 	}()
 
@@ -129,7 +144,12 @@ func (k *KVStore) SetW(keySrc, valueSrc []byte) (parts int, err error) {
 func (k *KVStore) DeleteW(keySrc []byte) (parts int, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			nErr, nOk := r.(error)
+			if nOk {
+				err = nErr
+			} else {
+				err = fmt.Errorf("%v", r)
+			}
 		}
 	}()
 
