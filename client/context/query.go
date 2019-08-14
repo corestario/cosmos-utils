@@ -2,9 +2,7 @@ package context
 
 import (
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	authTypes "github.com/dgamingfoundation/cosmos_utils/client/authtypes"
 
 	"github.com/pkg/errors"
@@ -135,7 +133,7 @@ func (ctx CLIContext) queryAccount(addr sdk.AccAddress) ([]byte, error) {
 		return nil, err
 	}
 
-	route := fmt.Sprintf("custom/%s/%s", ctx.AccountStore, auth.QueryAccount)
+	route := fmt.Sprintf("custom/%s/%s", ctx.AccountStore, authTypes.QueryAccount)
 
 	res, _, err := ctx.QueryWithData(route, bz)
 	if err != nil {

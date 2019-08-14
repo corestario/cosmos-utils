@@ -2,6 +2,7 @@ package context
 
 import (
 	"fmt"
+	"github.com/dgamingfoundation/cosmos_utils/client/authtypes"
 	"io"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/dgamingfoundation/cosmos_utils/client/keys"
 
 	"github.com/tendermint/tendermint/libs/log"
@@ -85,7 +85,7 @@ func NewCLIContext(chainID string, nodeURI string, from string, genOnly bool, br
 		Client:        rpc,
 		Output:        os.Stdout,
 		NodeURI:       nodeURI,
-		AccountStore:  auth.StoreKey,
+		AccountStore:  authtypes.StoreKey,
 		From:          from,
 		Height:        height,
 		TrustNode:     trustNode,
