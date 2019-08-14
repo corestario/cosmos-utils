@@ -11,7 +11,7 @@ import (
 // based on the context parameters. The result of the broadcast is parsed into
 // an intermediate structure which is logged if the context has a logger
 // defined.
-func (ctx CLIContext) BroadcastTx(txBytes []byte) (res sdk.TxResponse, err error) {
+func (ctx Context) BroadcastTx(txBytes []byte) (res sdk.TxResponse, err error) {
 	switch ctx.BroadcastMode {
 	case client.BroadcastSync:
 		res, err = ctx.BroadcastTxSync(txBytes)
@@ -35,7 +35,7 @@ func (ctx CLIContext) BroadcastTx(txBytes []byte) (res sdk.TxResponse, err error
 // NOTE: This should ideally not be used as the request may timeout but the tx
 // may still be included in a block. Use BroadcastTxAsync or BroadcastTxSync
 // instead.
-func (ctx CLIContext) BroadcastTxCommit(txBytes []byte) (sdk.TxResponse, error) {
+func (ctx Context) BroadcastTxCommit(txBytes []byte) (sdk.TxResponse, error) {
 	node, err := ctx.GetNode()
 	if err != nil {
 		return sdk.TxResponse{}, err
@@ -59,7 +59,7 @@ func (ctx CLIContext) BroadcastTxCommit(txBytes []byte) (sdk.TxResponse, error) 
 
 // BroadcastTxSync broadcasts transaction bytes to a Tendermint node
 // synchronously (i.e. returns after CheckTx execution).
-func (ctx CLIContext) BroadcastTxSync(txBytes []byte) (sdk.TxResponse, error) {
+func (ctx Context) BroadcastTxSync(txBytes []byte) (sdk.TxResponse, error) {
 	node, err := ctx.GetNode()
 	if err != nil {
 		return sdk.TxResponse{}, err
@@ -71,7 +71,7 @@ func (ctx CLIContext) BroadcastTxSync(txBytes []byte) (sdk.TxResponse, error) {
 
 // BroadcastTxAsync broadcasts transaction bytes to a Tendermint node
 // asynchronously (i.e. returns immediately).
-func (ctx CLIContext) BroadcastTxAsync(txBytes []byte) (sdk.TxResponse, error) {
+func (ctx Context) BroadcastTxAsync(txBytes []byte) (sdk.TxResponse, error) {
 	node, err := ctx.GetNode()
 	if err != nil {
 		return sdk.TxResponse{}, err

@@ -4,7 +4,7 @@ import "errors"
 
 // common errors for CLI and REST clients
 var (
-	ErrInvalidGasAdjustment = errors.New("invalid gas adjustment")
-	ErrInvalidSigner        = errors.New("tx intended signer does not match the given signer")
-	ErrPassphraseRequired   = errors.New("passphrase is required")
+	ErrInvalidGasAdjustment        = errors.New("invalid gas adjustment")
+	ErrInvalidSigner               = errors.New("tx intended signer does not match the given signer")
+	ErrPassphraseOrPrivKeyRequired = errors.New("passphrase or private key is required")
 )
