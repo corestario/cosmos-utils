@@ -1,4 +1,4 @@
-module github.com/dgamingfoundation/cosmos_utils/client
+module github.com/dgamingfoundation/cosmos-utils/client
 
 go 1.12
 
