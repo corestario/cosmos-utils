@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dgamingfoundation/cosmos_utils/client/context"
+	"github.com/dgamingfoundation/cosmos-utils/client/context"
 
-	"github.com/dgamingfoundation/cosmos_utils/client"
+	"github.com/dgamingfoundation/cosmos-utils/client"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 
@@ -14,7 +14,7 @@ import (
 	"github.com/tendermint/tendermint/libs/common"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dgamingfoundation/cosmos_utils/client/authtypes"
+	"github.com/dgamingfoundation/cosmos-utils/client/authtypes"
 )
 
 // GasEstimateResponse defines a response definition for tx gas estimation.

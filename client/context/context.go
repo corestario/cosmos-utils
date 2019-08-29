@@ -2,16 +2,17 @@ package context
 
 import (
 	"fmt"
-	"github.com/dgamingfoundation/cosmos_utils/client/authtypes"
 	"io"
 	"path/filepath"
+
+	"github.com/dgamingfoundation/cosmos-utils/client/authtypes"
 
 	"github.com/pkg/errors"
 	"github.com/tendermint/tendermint/crypto"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/dgamingfoundation/cosmos_utils/client/keys"
+	"github.com/dgamingfoundation/cosmos-utils/client/keys"
 
 	"github.com/tendermint/tendermint/libs/log"
 	tmlite "github.com/tendermint/tendermint/lite"
