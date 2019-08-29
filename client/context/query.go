@@ -2,8 +2,9 @@ package context
 
 import (
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authTypes "github.com/dgamingfoundation/cosmos_utils/client/authtypes"
+	authTypes "github.com/dgamingfoundation/cosmos-utils/client/authtypes"
 
 	"github.com/pkg/errors"
 
