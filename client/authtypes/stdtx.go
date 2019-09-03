@@ -8,6 +8,9 @@ import (
 	"github.com/tendermint/tendermint/crypto/multisig"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -133,7 +136,7 @@ func (fee StdFee) Bytes() []byte {
 	if len(fee.Amount) == 0 {
 		fee.Amount = sdk.NewCoins()
 	}
-	bz, err := ModuleCdc.MarshalJSON(fee) // TODO
+	bz, err := auth.ModuleCdc.MarshalJSON(fee) // TODO
 	if err != nil {
 		panic(err)
 	}
@@ -171,7 +174,7 @@ func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee StdFee, ms
 	for _, msg := range msgs {
 		msgsBytes = append(msgsBytes, json.RawMessage(msg.GetSignBytes()))
 	}
-	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
+	bz, err := auth.ModuleCdc.MarshalJSON(StdSignDoc{
 		AccountNumber: accnum,
 		ChainID:       chainID,
 		Fee:           json.RawMessage(fee.Bytes()),

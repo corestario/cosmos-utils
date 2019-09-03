@@ -5,8 +5,6 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/dgamingfoundation/cosmos-utils/client/authtypes"
-
 	"github.com/pkg/errors"
 	"github.com/tendermint/tendermint/crypto"
 
@@ -18,6 +16,8 @@ import (
 	tmlite "github.com/tendermint/tendermint/lite"
 	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
+
+	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -71,7 +71,7 @@ func NewContext(chainID string, nodeURI string, home string) (Context, error) {
 	cli = Context{
 		Client:        rpc,
 		NodeURI:       nodeURI,
-		AccountStore:  authtypes.StoreKey,
+		AccountStore:  auth.StoreKey,
 		Verifier:      verifier,
 		Home:          home,
 		BroadcastMode: "sync",

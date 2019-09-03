@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
 	"github.com/dgamingfoundation/cosmos-utils/client/context"
 
 	"github.com/dgamingfoundation/cosmos-utils/client"
@@ -180,7 +182,7 @@ func parseQueryResponse(cdc *amino.Codec, rawRes []byte) (uint64, error) {
 func PrepareTxBuilder(txBldr authtypes.TxBuilder, ctx context.Context) (authtypes.TxBuilder, error) {
 	from := ctx.GetFromAddress()
 
-	accGetter := authtypes.NewAccountRetriever(ctx)
+	accGetter := auth.NewAccountRetriever(ctx)
 	if err := accGetter.EnsureExists(from); err != nil {
 		return txBldr, err
 	}
@@ -189,7 +191,7 @@ func PrepareTxBuilder(txBldr authtypes.TxBuilder, ctx context.Context) (authtype
 	// TODO: (ref #1903) Allow for user supplied account number without
 	// automatically doing a manual lookup.
 	if txbldrAccNum == 0 || txbldrAccSeq == 0 {
-		num, seq, err := authtypes.NewAccountRetriever(ctx).GetAccountNumberSequence(from)
+		num, seq, err := auth.NewAccountRetriever(ctx).GetAccountNumberSequence(from)
 		if err != nil {
 			return txBldr, err
 		}
