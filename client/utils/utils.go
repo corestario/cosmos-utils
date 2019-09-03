@@ -66,7 +66,7 @@ func CompleteAndBroadcastTx(txBldr authtypes.TxBuilder, ctx context.Context, msg
 		return nil
 	}
 
-	if len(ctx.PrivKey.Bytes()) != 0 {
+	if ctx.PrivKey != nil && len(ctx.PrivKey.Bytes()) != 0 {
 		if txBytes, err = txBldr.BuildAndSignWithPrivKey(ctx.PrivKey, msgs); err != nil {
 			return err
 		}
