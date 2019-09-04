@@ -6,6 +6,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
 	"github.com/dgamingfoundation/cosmos-utils/client/context"
 
 	"github.com/dgamingfoundation/cosmos-utils/client"
@@ -125,7 +127,7 @@ func PrintUnsignedStdTx(
 	txBldr authtypes.TxBuilder, ctx context.Context, msgs []sdk.Msg, offline bool,
 ) (err error) {
 
-	var stdTx authtypes.StdTx
+	var stdTx types.StdTx
 
 	if offline {
 		stdTx, err = buildUnsignedStdTxOffline(txBldr, ctx, msgs)
@@ -150,7 +152,7 @@ func PrintUnsignedStdTx(
 func GetTxEncoder(cdc *codec.Codec) (encoder sdk.TxEncoder) {
 	encoder = sdk.GetConfig().GetTxEncoder()
 	if encoder == nil {
-		encoder = authtypes.DefaultTxEncoder(cdc)
+		encoder = types.DefaultTxEncoder(cdc)
 	}
 	return
 }
@@ -209,7 +211,7 @@ func PrepareTxBuilder(txBldr authtypes.TxBuilder, ctx context.Context) (authtype
 
 // buildUnsignedStdTx builds a StdTx as per the parameters passed in the
 // contexts. Gas is automatically estimated if gas wanted is set to 0.
-func buildUnsignedStdTx(txBldr authtypes.TxBuilder, ctx context.Context, msgs []sdk.Msg) (stdTx authtypes.StdTx, err error) {
+func buildUnsignedStdTx(txBldr authtypes.TxBuilder, ctx context.Context, msgs []sdk.Msg) (stdTx types.StdTx, err error) {
 	txBldr, err = PrepareTxBuilder(txBldr, ctx)
 	if err != nil {
 		return
@@ -217,7 +219,7 @@ func buildUnsignedStdTx(txBldr authtypes.TxBuilder, ctx context.Context, msgs []
 	return buildUnsignedStdTxOffline(txBldr, ctx, msgs)
 }
 
-func buildUnsignedStdTxOffline(txBldr authtypes.TxBuilder, ctx context.Context, msgs []sdk.Msg) (stdTx authtypes.StdTx, err error) {
+func buildUnsignedStdTxOffline(txBldr authtypes.TxBuilder, ctx context.Context, msgs []sdk.Msg) (stdTx types.StdTx, err error) {
 	if txBldr.SimulateAndExecute() {
 		txBldr, err = EnrichWithGas(txBldr, ctx, msgs)
 		if err != nil {
@@ -232,5 +234,5 @@ func buildUnsignedStdTxOffline(txBldr authtypes.TxBuilder, ctx context.Context, 
 		return
 	}
 
-	return authtypes.NewStdTx(stdSignMsg.Msgs, stdSignMsg.Fee, nil, stdSignMsg.Memo), nil
+	return types.NewStdTx(stdSignMsg.Msgs, stdSignMsg.Fee, nil, stdSignMsg.Memo), nil
 }
