@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authTypes "github.com/dgamingfoundation/cosmos-utils/client/authtypes"
 
 	"github.com/pkg/errors"
 
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/merkle"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -87,12 +87,12 @@ func (ctx Context) EnsureAccountExistsFromAddr(addr sdk.AccAddress) error {
 // queryAccount queries an account using custom query endpoint of auth module
 // returns an error if result is `null` otherwise account data
 func (ctx Context) queryAccount(addr sdk.AccAddress) ([]byte, error) {
-	bz, err := ctx.Codec.MarshalJSON(authTypes.NewQueryAccountParams(addr))
+	bz, err := ctx.Codec.MarshalJSON(auth.NewQueryAccountParams(addr))
 	if err != nil {
 		return nil, err
 	}
 
-	route := fmt.Sprintf("custom/%s/%s", ctx.AccountStore, authTypes.QueryAccount)
+	route := fmt.Sprintf("custom/%s/%s", ctx.AccountStore, auth.QueryAccount)
 
 	res, _, err := ctx.QueryWithData(route, bz)
 	if err != nil {

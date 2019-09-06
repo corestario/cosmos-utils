@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	crkeys "github.com/cosmos/cosmos-sdk/crypto/keys"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -149,15 +151,15 @@ func (bldr TxBuilder) WithAccountNumber(accnum uint64) TxBuilder {
 // BuildSignMsg builds a single message to be signed from a TxBuilder given a
 // set of messages. It returns an error if a fee is supplied but cannot be
 // parsed.
-func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
+func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (types.StdSignMsg, error) {
 	if bldr.chainID == "" {
-		return StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
+		return types.StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
 	}
 
 	fees := bldr.fees
 	if !bldr.gasPrices.IsZero() {
 		if !fees.IsZero() {
-			return StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
+			return types.StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
 		}
 
 		glDec := sdk.NewDec(int64(bldr.gas))
@@ -171,33 +173,33 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 		}
 	}
 
-	return StdSignMsg{
+	return types.StdSignMsg{
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,
 		Sequence:      bldr.sequence,
 		Memo:          bldr.memo,
 		Msgs:          msgs,
-		Fee:           NewStdFee(bldr.gas, fees),
+		Fee:           types.NewStdFee(bldr.gas, fees),
 	}, nil
 }
 
 // Sign signs a transaction given a name, passphrase, and a single message to
 // signed. An error is returned if signing fails.
-func (bldr TxBuilder) Sign(name, passphrase string, msg StdSignMsg) ([]byte, error) {
+func (bldr TxBuilder) Sign(name, passphrase string, msg types.StdSignMsg) ([]byte, error) {
 	sig, err := MakeSignature(bldr.keybase, name, passphrase, msg)
 	if err != nil {
 		return nil, err
 	}
 
-	return bldr.txEncoder(NewStdTx(msg.Msgs, msg.Fee, []StdSignature{sig}, msg.Memo))
+	return bldr.txEncoder(types.NewStdTx(msg.Msgs, msg.Fee, []types.StdSignature{sig}, msg.Memo))
 }
 
-func (bldr TxBuilder) SignWithPrivKey(privKey crypto.PrivKey, msg StdSignMsg) ([]byte, error) {
+func (bldr TxBuilder) SignWithPrivKey(privKey crypto.PrivKey, msg types.StdSignMsg) ([]byte, error) {
 	sig, err := MakeSignatureWithPrivateKey(privKey, msg)
 	if err != nil {
 		return nil, err
 	}
-	return bldr.txEncoder(NewStdTx(msg.Msgs, msg.Fee, []StdSignature{sig}, msg.Memo))
+	return bldr.txEncoder(types.NewStdTx(msg.Msgs, msg.Fee, []types.StdSignature{sig}, msg.Memo))
 }
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
@@ -231,18 +233,18 @@ func (bldr TxBuilder) BuildTxForSim(msgs []sdk.Msg) ([]byte, error) {
 	}
 
 	// the ante handler will populate with a sentinel pubkey
-	sigs := []StdSignature{{}}
-	return bldr.txEncoder(NewStdTx(signMsg.Msgs, signMsg.Fee, sigs, signMsg.Memo))
+	sigs := []types.StdSignature{{}}
+	return bldr.txEncoder(types.NewStdTx(signMsg.Msgs, signMsg.Fee, sigs, signMsg.Memo))
 }
 
 // SignStdTx appends a signature to a StdTx and returns a copy of it. If append
 // is false, it replaces the signatures already attached with the new signature.
-func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx StdTx, appendSig bool) (signedStdTx StdTx, err error) {
+func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx types.StdTx, appendSig bool) (signedStdTx types.StdTx, err error) {
 	if bldr.chainID == "" {
-		return StdTx{}, fmt.Errorf("chain ID required but not specified")
+		return types.StdTx{}, fmt.Errorf("chain ID required but not specified")
 	}
 
-	stdSignature, err := MakeSignature(bldr.keybase, name, passphrase, StdSignMsg{
+	stdSignature, err := MakeSignature(bldr.keybase, name, passphrase, types.StdSignMsg{
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,
 		Sequence:      bldr.sequence,
@@ -256,17 +258,17 @@ func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx StdTx, appendSig 
 
 	sigs := stdTx.GetSignatures()
 	if len(sigs) == 0 || !appendSig {
-		sigs = []StdSignature{stdSignature}
+		sigs = []types.StdSignature{stdSignature}
 	} else {
 		sigs = append(sigs, stdSignature)
 	}
-	signedStdTx = NewStdTx(stdTx.GetMsgs(), stdTx.Fee, sigs, stdTx.GetMemo())
+	signedStdTx = types.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, sigs, stdTx.GetMemo())
 	return
 }
 
 // MakeSignature builds a StdSignature given keybase, key name, passphrase, and a StdSignMsg.
 func MakeSignature(keybase crkeys.Keybase, name, passphrase string,
-	msg StdSignMsg) (sig StdSignature, err error) {
+	msg types.StdSignMsg) (sig types.StdSignature, err error) {
 	if keybase == nil {
 		keybase, err = keys.NewKeyBaseFromHomeFlag()
 		if err != nil {
@@ -278,18 +280,18 @@ func MakeSignature(keybase crkeys.Keybase, name, passphrase string,
 	if err != nil {
 		return
 	}
-	return StdSignature{
+	return types.StdSignature{
 		PubKey:    pubkey,
 		Signature: sigBytes,
 	}, nil
 }
 
-func MakeSignatureWithPrivateKey(privKey crypto.PrivKey, msg StdSignMsg) (sig StdSignature, err error) {
+func MakeSignatureWithPrivateKey(privKey crypto.PrivKey, msg types.StdSignMsg) (sig types.StdSignature, err error) {
 	sigBytes, err := privKey.Sign(msg.Bytes())
 	if err != nil {
 		return
 	}
-	return StdSignature{
+	return types.StdSignature{
 		PubKey:    privKey.PubKey(),
 		Signature: sigBytes,
 	}, nil
