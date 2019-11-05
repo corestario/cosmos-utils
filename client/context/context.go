@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
@@ -72,6 +74,47 @@ func NewContext(chainID string, nodeURI string, home string) (Context, error) {
 		BroadcastMode: BroadcastSync,
 	}
 	return cli, nil
+}
+
+func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context, error) {
+	var (
+		rpc rpcclient.Client
+		cli Context
+		err error
+		mtx sync.Mutex
+	)
+
+	if nodeURI != "" {
+		rpc = rpcclient.NewHTTP(nodeURI, "/websocket")
+	} else {
+		return nil, fmt.Errorf("no nodeURI specified")
+	}
+
+	var verifier tmlite.Verifier
+	go func() {
+		for {
+			mtx.Lock()
+			verifier, err = createVerifier(chainID, home, nodeURI)
+			mtx.Unlock()
+			if err != nil {
+				time.Sleep(time.Second * 5)
+			} else {
+				break
+			}
+		}
+	}()
+
+	mtx.Lock()
+	defer mtx.Unlock()
+	cli = Context{
+		Client:        rpc,
+		NodeURI:       nodeURI,
+		AccountStore:  AccountStoreKey,
+		Verifier:      verifier,
+		Home:          home,
+		BroadcastMode: BroadcastSync,
+	}
+	return &cli, nil
 }
 
 func createVerifier(chainID string, home string, nodeURI string) (tmlite.Verifier, error) {
