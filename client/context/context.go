@@ -93,15 +93,18 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 	var verifier tmlite.Verifier
 	go func() {
 		for {
-			mtx.Lock()
-			verifier, err = createVerifier(chainID, home, nodeURI)
-			mtx.Unlock()
+			node := rpcclient.NewHTTP(nodeURI, "/websocket")
+			_, err := node.Status()
 			if err != nil {
 				time.Sleep(time.Second * 5)
 			} else {
 				break
 			}
 		}
+
+		mtx.Lock()
+		verifier, err = createVerifier(chainID, home, nodeURI)
+		mtx.Unlock()
 	}()
 
 	mtx.Lock()
