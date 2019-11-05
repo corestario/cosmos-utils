@@ -5,21 +5,16 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/pkg/errors"
-	"github.com/tendermint/tendermint/crypto"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/dgamingfoundation/cosmos-utils/client/keys"
-
+	"github.com/pkg/errors"
+	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 	tmlite "github.com/tendermint/tendermint/lite"
 	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
-
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Context implements a typical CLI context created in SDK modules for
@@ -71,7 +66,7 @@ func NewContext(chainID string, nodeURI string, home string) (Context, error) {
 	cli = Context{
 		Client:        rpc,
 		NodeURI:       nodeURI,
-		AccountStore:  auth.StoreKey,
+		AccountStore:  "acc",
 		Verifier:      verifier,
 		Home:          home,
 		BroadcastMode: "sync",

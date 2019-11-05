@@ -3,7 +3,6 @@ package context
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -13,13 +12,13 @@ import (
 // defined.
 func (ctx Context) BroadcastTx(txBytes []byte) (res sdk.TxResponse, err error) {
 	switch ctx.BroadcastMode {
-	case client.BroadcastSync:
+	case "sync":
 		res, err = ctx.BroadcastTxSync(txBytes)
 
-	case client.BroadcastAsync:
+	case "async":
 		res, err = ctx.BroadcastTxAsync(txBytes)
 
-	case client.BroadcastBlock:
+	case "block":
 		res, err = ctx.BroadcastTxCommit(txBytes)
 
 	default:

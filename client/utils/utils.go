@@ -4,21 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
-
-	"github.com/dgamingfoundation/cosmos-utils/client/context"
-
-	"github.com/dgamingfoundation/cosmos-utils/client"
-
 	"github.com/cosmos/cosmos-sdk/codec"
-
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/dgamingfoundation/cosmos-utils/client"
+	"github.com/dgamingfoundation/cosmos-utils/client/authtypes"
+	"github.com/dgamingfoundation/cosmos-utils/client/context"
 	"github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/libs/common"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dgamingfoundation/cosmos-utils/client/authtypes"
 )
 
 // GasEstimateResponse defines a response definition for tx gas estimation.
@@ -184,7 +177,7 @@ func parseQueryResponse(cdc *amino.Codec, rawRes []byte) (uint64, error) {
 func PrepareTxBuilder(txBldr authtypes.TxBuilder, ctx context.Context) (authtypes.TxBuilder, error) {
 	from := ctx.GetFromAddress()
 
-	accGetter := auth.NewAccountRetriever(ctx)
+	accGetter := types.NewAccountRetriever(ctx)
 	if err := accGetter.EnsureExists(from); err != nil {
 		return txBldr, err
 	}
@@ -193,7 +186,7 @@ func PrepareTxBuilder(txBldr authtypes.TxBuilder, ctx context.Context) (authtype
 	// TODO: (ref #1903) Allow for user supplied account number without
 	// automatically doing a manual lookup.
 	if txbldrAccNum == 0 || txbldrAccSeq == 0 {
-		num, seq, err := auth.NewAccountRetriever(ctx).GetAccountNumberSequence(from)
+		num, seq, err := types.NewAccountRetriever(ctx).GetAccountNumberSequence(from)
 		if err != nil {
 			return txBldr, err
 		}
