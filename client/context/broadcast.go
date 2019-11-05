@@ -12,13 +12,13 @@ import (
 // defined.
 func (ctx Context) BroadcastTx(txBytes []byte) (res sdk.TxResponse, err error) {
 	switch ctx.BroadcastMode {
-	case "sync":
+	case BroadcastSync:
 		res, err = ctx.BroadcastTxSync(txBytes)
 
-	case "async":
+	case BroadcastAsync:
 		res, err = ctx.BroadcastTxAsync(txBytes)
 
-	case "block":
+	case BroadcastBlock:
 		res, err = ctx.BroadcastTxCommit(txBytes)
 
 	default:

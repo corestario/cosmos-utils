@@ -66,10 +66,10 @@ func NewContext(chainID string, nodeURI string, home string) (Context, error) {
 	cli = Context{
 		Client:        rpc,
 		NodeURI:       nodeURI,
-		AccountStore:  "acc",
+		AccountStore:  AccountStoreKey,
 		Verifier:      verifier,
 		Home:          home,
-		BroadcastMode: "sync",
+		BroadcastMode: BroadcastSync,
 	}
 	return cli, nil
 }
