@@ -101,7 +101,7 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 		for {
 			node := rpcclient.NewHTTP(nodeURI, "/websocket")
 			st, err := node.Status()
-			if err != nil || node.IsRunning() {
+			if err != nil || !node.IsRunning() {
 				fmt.Printf("node is not running, status: %#+v", st)
 				time.Sleep(time.Second * 4)
 			} else {
