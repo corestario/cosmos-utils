@@ -2,14 +2,11 @@ package context
 
 import (
 	"fmt"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/pkg/errors"
-
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/store/rootmulti"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pkg/errors"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/merkle"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -17,8 +14,6 @@ import (
 	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	tmtypes "github.com/tendermint/tendermint/types"
-
-	"github.com/cosmos/cosmos-sdk/store/rootmulti"
 )
 
 // GetNode returns an RPC client. If the context's client is not defined, an
@@ -84,15 +79,19 @@ func (ctx Context) EnsureAccountExistsFromAddr(addr sdk.AccAddress) error {
 	return err
 }
 
+type QueryAccountParams struct {
+	Address sdk.AccAddress
+}
+
 // queryAccount queries an account using custom query endpoint of auth module
 // returns an error if result is `null` otherwise account data
 func (ctx Context) queryAccount(addr sdk.AccAddress) ([]byte, error) {
-	bz, err := ctx.Codec.MarshalJSON(auth.NewQueryAccountParams(addr))
+	bz, err := ctx.Codec.MarshalJSON(QueryAccountParams{Address: addr})
 	if err != nil {
 		return nil, err
 	}
 
-	route := fmt.Sprintf("custom/%s/%s", ctx.AccountStore, auth.QueryAccount)
+	route := fmt.Sprintf("custom/%s/%s", ctx.AccountStore, "account")
 
 	res, _, err := ctx.QueryWithData(route, bz)
 	if err != nil {
@@ -104,7 +103,7 @@ func (ctx Context) queryAccount(addr sdk.AccAddress) ([]byte, error) {
 
 // query performs a query from a Tendermint node with the provided store name
 // and path.
-func (ctx Context) query(path string, key cmn.HexBytes) (res []byte, height int64, err error) {
+func (ctx *Context) query(path string, key cmn.HexBytes) (res []byte, height int64, err error) {
 	node, err := ctx.GetNode()
 	if err != nil {
 		return res, height, err
@@ -117,7 +116,7 @@ func (ctx Context) query(path string, key cmn.HexBytes) (res []byte, height int6
 		if err != nil {
 			return res, height, err
 		}
-		ctx = ctx.WithHeight(status.SyncInfo.LatestBlockHeight)
+		ctx.WithHeight(status.SyncInfo.LatestBlockHeight)
 	}
 
 	opts := rpcclient.ABCIQueryOptions{
@@ -149,8 +148,8 @@ func (ctx Context) query(path string, key cmn.HexBytes) (res []byte, height int6
 }
 
 // Verify verifies the consensus proof at given height.
-func (ctx Context) Verify(height int64) (tmtypes.SignedHeader, error) {
-	check, err := tmliteProxy.GetCertifiedCommit(height, ctx.Client, ctx.Verifier)
+func (ctx *Context) Verify(height int64) (tmtypes.SignedHeader, error) {
+	check, err := tmliteProxy.GetCertifiedCommit(height, ctx.Client, ctx.GetVerifier())
 	switch {
 	case tmliteErr.IsErrCommitNotFound(err):
 		return tmtypes.SignedHeader{}, ErrVerifyCommit(height)
@@ -162,8 +161,8 @@ func (ctx Context) Verify(height int64) (tmtypes.SignedHeader, error) {
 }
 
 // verifyProof perform response proof verification.
-func (ctx Context) verifyProof(queryPath string, resp abci.ResponseQuery) error {
-	if ctx.Verifier == nil {
+func (ctx *Context) verifyProof(queryPath string, resp abci.ResponseQuery) error {
+	if ctx.GetVerifier() == nil {
 		return fmt.Errorf("missing valid certifier to verify data from distrusted node")
 	}
 
@@ -203,7 +202,7 @@ func (ctx Context) verifyProof(queryPath string, resp abci.ResponseQuery) error 
 
 // queryStore performs a query from a Tendermint node with the provided a store
 // name and path.
-func (ctx Context) queryStore(key cmn.HexBytes, storeName, endPath string) ([]byte, int64, error) {
+func (ctx *Context) queryStore(key cmn.HexBytes, storeName, endPath string) ([]byte, int64, error) {
 	path := fmt.Sprintf("/store/%s/%s", storeName, endPath)
 	return ctx.query(path, key)
 }

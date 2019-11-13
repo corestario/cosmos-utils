@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
-
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	crkeys "github.com/cosmos/cosmos-sdk/crypto/keys"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/tendermint/crypto"
 )
 
