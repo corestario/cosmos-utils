@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dgamingfoundation/cosmos-utils/client/keys"
+	"github.com/corestario/cosmos-utils/client/keys"
 	"github.com/pkg/errors"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
