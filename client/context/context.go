@@ -79,7 +79,6 @@ func NewContext(chainID string, nodeURI string, home string) (*Context, error) {
 func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context, error) {
 	var (
 		rpc rpcclient.Client
-		err error
 		ctx *Context
 	)
 
@@ -106,9 +105,6 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 			node := rpcclient.NewHTTP(nodeURI, "/websocket")
 			st, err := node.Status()
 			if err != nil {
-				if err := node.Start(); err != nil {
-					panic(err)
-				}
 				fmt.Printf("node is not running, status: %#+v", st)
 				time.Sleep(time.Second * 4)
 			} else {
@@ -116,7 +112,10 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 			}
 		}
 
-		verifier, err = createVerifier(chainID, home, nodeURI)
+		verifier, err := createVerifier(chainID, home, nodeURI)
+		if err != nil {
+			panic(err)
+		}
 		ctx.WithVerifier(verifier)
 	}()
 
