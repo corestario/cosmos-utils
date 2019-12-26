@@ -114,7 +114,7 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 
 		verifier, err := createVerifier(chainID, home, nodeURI)
 		if err != nil {
-			panic(err)
+			fmt.Printf("could not create verifier, error: %v", err)
 		}
 		ctx.WithVerifier(verifier)
 	}()
