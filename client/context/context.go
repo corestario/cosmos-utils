@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/corestario/cosmos-utils/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/corestario/cosmos-utils/client/keys"
 	"github.com/pkg/errors"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
@@ -78,9 +79,11 @@ func NewContext(chainID string, nodeURI string, home string) (*Context, error) {
 func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context, error) {
 	var (
 		rpc rpcclient.Client
-		err error
 		ctx *Context
 	)
+
+	t := strconv.FormatInt(time.Now().UnixNano(), 10)
+	home += t
 
 	if nodeURI != "" {
 		rpc = rpcclient.NewHTTP(nodeURI, "/websocket")
@@ -101,7 +104,7 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 		for {
 			node := rpcclient.NewHTTP(nodeURI, "/websocket")
 			st, err := node.Status()
-			if err != nil || !node.IsRunning() {
+			if err != nil {
 				fmt.Printf("node is not running, status: %#+v", st)
 				time.Sleep(time.Second * 4)
 			} else {
@@ -109,7 +112,10 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 			}
 		}
 
-		verifier, err = createVerifier(chainID, home, nodeURI)
+		verifier, err := createVerifier(chainID, home, nodeURI)
+		if err != nil {
+			fmt.Printf("could not create verifier, error: %v", err)
+		}
 		ctx.WithVerifier(verifier)
 	}()
 
