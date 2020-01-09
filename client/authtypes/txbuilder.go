@@ -256,11 +256,15 @@ func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx types.StdTx, appe
 
 	sigs := stdTx.GetSignatures()
 	if len(sigs) == 0 || !appendSig {
-		sigs = []types.StdSignature{stdSignature}
+		sigs = [][]byte{stdSignature.Bytes()}
 	} else {
-		sigs = append(sigs, stdSignature)
+		sigs = append(sigs, stdSignature.Bytes())
 	}
-	signedStdTx = types.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, sigs, stdTx.GetMemo())
+	var stdSigs []types.StdSignature
+	for _, sig := range sigs {
+		stdSigs = append(stdSigs, types.StdSignature{Signature: sig})
+	}
+	signedStdTx = types.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, stdSigs, stdTx.GetMemo())
 	return
 }
 
