@@ -170,7 +170,10 @@ func parseQueryResponse(cdc *amino.Codec, rawRes []byte) (uint64, error) {
 	if err := cdc.UnmarshalBinaryLengthPrefixed(rawRes, &simulationResult); err != nil {
 		return 0, err
 	}
-	return simulationResult.GasUsed, nil
+
+	// TODO: fix properly.
+	//return simulationResult.GasUsed, nil
+	return 0, nil
 }
 
 // PrepareTxBuilder populates a TxBuilder in preparation for the build of a Tx.
