@@ -5,11 +5,27 @@
 *.so
 *.dylib
 
+# OS
+.DS_Store
+*.swp
+*.swo
+.vscode
+.idea
+
+# Build
+vendor
+.vendor-new
+build
+
+# IDE
+.idea/
+*.iml
+
 # Test binary, build with `go test -c`
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-go.sum
+*.log
 
