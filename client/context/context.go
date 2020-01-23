@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
-	"strconv"
 	"sync"
 	"time"
 
@@ -82,8 +81,8 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 		ctx *Context
 	)
 
-	t := strconv.FormatInt(time.Now().UnixNano(), 10)
-	home += t
+	//t := strconv.FormatInt(time.Now().UnixNano(), 10)
+	//home += t
 
 	if nodeURI != "" {
 		rpc = rpcclient.NewHTTP(nodeURI, "/websocket")
