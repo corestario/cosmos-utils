@@ -14,10 +14,7 @@ require (
 
 replace golang.org/x/crypto => github.com/tendermint/crypto v0.0.0-20180820045704-3764759f34a5
 
-replace github.com/tendermint/tendermint => ./../../tendermint
+replace github.com/tendermint/tendermint => github.com/corestario/tendermint develop
 
-replace github.com/corestario/dkglib => ./../../dkglib
+replace github.com/cosmos/cosmos-sdk => github.com/corestario/cosmos-sdk master
 
-replace github.com/cosmos/cosmos-sdk => ./../../cosmos-sdk
-
-replace github.com/corestario/cosmos-utils/client => ./
