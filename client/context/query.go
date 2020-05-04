@@ -9,11 +9,11 @@ import (
 	"github.com/pkg/errors"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/merkle"
-	cmn "github.com/tendermint/tendermint/libs/common"
 	tmliteErr "github.com/tendermint/tendermint/lite/errors"
 	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	tmtypes "github.com/tendermint/tendermint/types"
+	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 )
 
 // GetNode returns an RPC client. If the context's client is not defined, an
@@ -27,7 +27,7 @@ func (ctx Context) GetNode() (rpcclient.Client, error) {
 }
 
 // Query performs a query for information about the connected node.
-func (ctx Context) Query(path string, data cmn.HexBytes) ([]byte, int64, error) {
+func (ctx Context) Query(path string, data tmbytes.HexBytes) ([]byte, int64, error) {
 	return ctx.query(path, data)
 }
 
@@ -38,7 +38,7 @@ func (ctx Context) QueryWithData(path string, data []byte) ([]byte, int64, error
 
 // QueryStore performs a query from a Tendermint node with the provided key and
 // store name.
-func (ctx Context) QueryStore(key cmn.HexBytes, storeName string) ([]byte, int64, error) {
+func (ctx Context) QueryStore(key tmbytes.HexBytes, storeName string) ([]byte, int64, error) {
 	return ctx.queryStore(key, storeName, "key")
 }
 
@@ -103,7 +103,7 @@ func (ctx Context) queryAccount(addr sdk.AccAddress) ([]byte, error) {
 
 // query performs a query from a Tendermint node with the provided store name
 // and path.
-func (ctx *Context) query(path string, key cmn.HexBytes) (res []byte, height int64, err error) {
+func (ctx *Context) query(path string, key tmbytes.HexBytes) (res []byte, height int64, err error) {
 	node, err := ctx.GetNode()
 	if err != nil {
 		return res, height, err
@@ -202,7 +202,7 @@ func (ctx *Context) verifyProof(queryPath string, resp abci.ResponseQuery) error
 
 // queryStore performs a query from a Tendermint node with the provided a store
 // name and path.
-func (ctx *Context) queryStore(key cmn.HexBytes, storeName, endPath string) ([]byte, int64, error) {
+func (ctx *Context) queryStore(key tmbytes.HexBytes, storeName, endPath string) ([]byte, int64, error) {
 	path := fmt.Sprintf("/store/%s/%s", storeName, endPath)
 	return ctx.query(path, key)
 }

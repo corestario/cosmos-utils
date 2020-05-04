@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/tendermint/iavl/common"
 	"os"
 
 	"github.com/corestario/cosmos-utils/client"
@@ -11,7 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/go-amino"
-	"github.com/tendermint/tendermint/libs/common"
+	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 )
 
 // GasEstimateResponse defines a response definition for tx gas estimation.
@@ -97,7 +98,7 @@ func EnrichWithGas(txBldr authtypes.TxBuilder, ctx context.Context, msgs []sdk.M
 
 // CalculateGas simulates the execution of a transaction and returns
 // both the estimate obtained by the query and the adjusted amount.
-func CalculateGas(queryFunc func(string, common.HexBytes) ([]byte, int64, error),
+func CalculateGas(queryFunc func(string, tmbytes.HexBytes) ([]byte, int64, error),
 	cdc *amino.Codec, txBytes []byte, adjustment float64) (estimate, adjusted uint64, err error) {
 
 	// run a simulation (via /app/simulate query) to

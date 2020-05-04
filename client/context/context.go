@@ -7,9 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/corestario/cosmos-utils/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
-	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/tendermint/tendermint/crypto"
@@ -17,6 +16,7 @@ import (
 	tmlite "github.com/tendermint/tendermint/lite"
 	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
+	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
 // Context implements a typical CLI context created in SDK modules for
@@ -24,7 +24,7 @@ import (
 type Context struct {
 	Codec         *codec.Codec
 	Client        rpcclient.Client
-	Keybase       cryptokeys.Keybase
+	Keyring       keyring.Keyring
 	Output        io.Writer
 	OutputFormat  string
 	Height        int64
@@ -57,7 +57,10 @@ func NewContext(chainID string, nodeURI string, home string) (*Context, error) {
 	)
 
 	if nodeURI != "" {
-		rpc = rpcclient.NewHTTP(nodeURI, "/websocket")
+		rpc, err = rpchttp.New(nodeURI, "/websocket")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	verifier, err := createVerifier(chainID, home, nodeURI)
@@ -79,13 +82,17 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 	var (
 		rpc rpcclient.Client
 		ctx *Context
+		err error
 	)
 
 	//t := strconv.FormatInt(time.Now().UnixNano(), 10)
 	//home += t
 
 	if nodeURI != "" {
-		rpc = rpcclient.NewHTTP(nodeURI, "/websocket")
+		rpc, err = rpchttp.New(nodeURI, "/websocket")
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		return nil, fmt.Errorf("no nodeURI specified")
 	}
@@ -101,7 +108,11 @@ func NewContextWithDelay(chainID string, nodeURI string, home string) (*Context,
 	}
 	go func() {
 		for {
-			node := rpcclient.NewHTTP(nodeURI, "/websocket")
+			node, err := rpchttp.New(nodeURI, "/websocket")
+			if err != nil {
+				fmt.Println("failed to start node", err.Error())
+				return
+			}
 			st, err := node.Status()
 			if err != nil {
 				fmt.Printf("node is not running, status: %#+v", st)
@@ -132,7 +143,10 @@ func createVerifier(chainID string, home string, nodeURI string) (tmlite.Verifie
 		return nil, errors.New("Invalid nodeURI")
 	}
 
-	node := rpcclient.NewHTTP(nodeURI, "/websocket")
+	node, err := rpchttp.New(nodeURI, "/websocket")
+	if err != nil {
+		return nil, err
+	}
 	cacheSize := 10 // TODO: determine appropriate cache size
 	verifier, err := tmliteProxy.NewVerifier(
 		chainID, filepath.Join(home, ".gaialite"),
@@ -190,8 +204,12 @@ func (ctx *Context) WithTrustNode(trustNode bool) *Context {
 
 // WithNodeURI returns a copy of the context with an updated node URI.
 func (ctx *Context) WithNodeURI(nodeURI string) *Context {
+	var err error
 	ctx.NodeURI = nodeURI
-	ctx.Client = rpcclient.NewHTTP(nodeURI, "/websocket")
+	ctx.Client, err = rpchttp.New(nodeURI, "/websocket")
+	if err != nil {
+		fmt.Println("failed to start rpc", err.Error())
+	}
 	return ctx
 }
 
@@ -295,24 +313,19 @@ func (ctx *Context) PrintOutput(toPrint fmt.Stringer) (err error) {
 // GetFromFields returns a from account address and Keybase name given either
 // an address or key name. If genOnly is true, only a valid Bech32 cosmos
 // address is returned.
-func GetFromFields(from string, home string) (sdk.AccAddress, string, error) {
+func GetFromFields(kr keyring.Keyring, from string, home string) (sdk.AccAddress, string, error) {
 	if from == "" {
 		return nil, "", nil
 	}
 
-	keybase, err := keys.NewKeyBaseFromDir(home)
-	if err != nil {
-		return nil, "", err
-	}
-
-	var info cryptokeys.Info
+	var info keyring.Info
 	if addr, err := sdk.AccAddressFromBech32(from); err == nil {
-		info, err = keybase.GetByAddress(addr)
+		info, err = kr.KeyByAddress(addr)
 		if err != nil {
 			return nil, "", err
 		}
 	} else {
-		info, err = keybase.Get(from)
+		info, err = kr.Key(from)
 		if err != nil {
 			return nil, "", err
 		}

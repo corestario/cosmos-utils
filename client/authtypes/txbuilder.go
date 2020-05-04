@@ -3,10 +3,12 @@ package authtypes
 import (
 	"errors"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/spf13/viper"
+	"os"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/client/keys"
-	crkeys "github.com/cosmos/cosmos-sdk/crypto/keys"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/tendermint/crypto"
@@ -15,7 +17,7 @@ import (
 // TxBuilder implements a transaction context created in SDK modules.
 type TxBuilder struct {
 	txEncoder          sdk.TxEncoder
-	keybase            crkeys.Keybase
+	keybase            keyring.Keyring
 	accountNumber      uint64
 	sequence           uint64
 	gas                uint64
@@ -64,7 +66,7 @@ func (bldr TxBuilder) Gas() uint64 { return bldr.gas }
 func (bldr TxBuilder) GasAdjustment() float64 { return bldr.gasAdjustment }
 
 // Keybase returns the keybase
-func (bldr TxBuilder) Keybase() crkeys.Keybase { return bldr.keybase }
+func (bldr TxBuilder) Keybase() keyring.Keyring { return bldr.keybase }
 
 // SimulateAndExecute returns the option to simulate and then execute the transaction
 // using the gas from the simulation results
@@ -123,7 +125,7 @@ func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
 }
 
 // WithKeybase returns a copy of the context with updated keybase.
-func (bldr TxBuilder) WithKeybase(keybase crkeys.Keybase) TxBuilder {
+func (bldr TxBuilder) WithKeybase(keybase keyring.Keyring) TxBuilder {
 	bldr.keybase = keybase
 	return bldr
 }
@@ -254,36 +256,33 @@ func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx types.StdTx, appe
 		return
 	}
 
-	sigs := stdTx.GetSignatures()
+	sigs := stdTx.Signatures
 	if len(sigs) == 0 || !appendSig {
-		sigs = [][]byte{stdSignature.Bytes()}
+		sigs = []types.StdSignature{stdSignature}
 	} else {
-		sigs = append(sigs, stdSignature.Bytes())
+		sigs = append(sigs, stdSignature)
 	}
-	var stdSigs []types.StdSignature
-	for _, sig := range sigs {
-		stdSigs = append(stdSigs, types.StdSignature{Signature: sig})
-	}
-	signedStdTx = types.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, stdSigs, stdTx.GetMemo())
+	signedStdTx = types.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, sigs, stdTx.GetMemo())
 	return
 }
 
 // MakeSignature builds a StdSignature given keybase, key name, passphrase, and a StdSignMsg.
-func MakeSignature(keybase crkeys.Keybase, name, passphrase string,
+func MakeSignature(keybase keyring.Keyring, name, passphrase string,
 	msg types.StdSignMsg) (sig types.StdSignature, err error) {
+
 	if keybase == nil {
-		keybase, err = keys.NewKeyBaseFromHomeFlag()
+		keybase, err = keyring.New(sdk.KeyringServiceName(), viper.GetString(flags.FlagKeyringBackend), viper.GetString(flags.FlagHome), os.Stdin)
 		if err != nil {
 			return
 		}
 	}
 
-	sigBytes, pubkey, err := keybase.Sign(name, passphrase, msg.Bytes())
+	sigBytes, pubkey, err := keybase.Sign(name, msg.Bytes())
 	if err != nil {
 		return
 	}
 	return types.StdSignature{
-		PubKey:    pubkey,
+		PubKey:    pubkey.Bytes(),
 		Signature: sigBytes,
 	}, nil
 }
@@ -294,7 +293,7 @@ func MakeSignatureWithPrivateKey(privKey crypto.PrivKey, msg types.StdSignMsg) (
 		return
 	}
 	return types.StdSignature{
-		PubKey:    privKey.PubKey(),
+		PubKey:    privKey.PubKey().Bytes(),
 		Signature: sigBytes,
 	}, nil
 }
